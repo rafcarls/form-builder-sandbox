@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="pt-BR">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+        <title>Builder</title>
+
+        <link rel="shortcut icon" href="data:," type="image/x-icon" />
+
+        <link rel="stylesheet" href="../node_modules/bootstrap/dist/css/bootstrap.min.css" />
+        <link rel="stylesheet" href="../node_modules/bootstrap-icons/font/bootstrap-icons.min.css" />
+
+        <link rel="stylesheet" href="../assets/css/style.css" />
+    </head>
+
+    <body>
+        <main class="container py-3">
+            <div class="p-3 border rounded-1" id="fb-builder-root"></div>
+
+            <section class="mt-3 p-3 border rounded-1 d-flex justify-content-center gap-2" id="fb-actions">
+                <button type="button" class="btn btn-secondary" id="fb-btn-export-js">Exportar JS</button>
+                <button type="button" class="btn btn-secondary" id="fb-btn-export-json">Exportar JSON</button>
+                <button type="button" class="btn btn-secondary" id="fb-btn-export-xml">Exportar XML</button>
+                <button type="button" class="btn btn-danger" id="fb-btn-clear">Limpar</button>
+                <button type="button" class="btn btn-success" id="fb-btn-save">Salvar</button>
+            </section>
+        </main>
+
+        <script src="../node_modules/jquery/dist/jquery.min.js"></script>
+        <script src="../node_modules/jquery-ui/dist/jquery-ui.min.js"></script>
+        <script src="../node_modules/formBuilder/dist/form-builder.min.js"></script>
+        <script src="../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+        <script type="module" src="../assets/js/builder.js"></script>
+    </body>
+</html>

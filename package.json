@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "bootstrap": "^5.3.8",
+    "bootstrap-icons": "^1.13.1",
+    "formBuilder": "^3.22.0",
+    "formbuilder-languages": "^1.2.0",
+    "jquery": "^4.0.0",
+    "jquery-ui": "^1.14.2"
+  }
+}

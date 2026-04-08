@@ -1,0 +1,18 @@
+/* #fb-builder-root .form-actions.btn-group {
+    display: none;
+} */
+
+#fb-render-root .form-group:last-of-type {
+    margin-bottom: 0;
+}
+
+.fb-field-hiperlink {
+    color: rgba(var(--bs-link-color-rgb), var(--bs-link-opacity, 1));
+    cursor: pointer;
+    text-align: justify;
+    text-decoration: underline;
+}
+
+.fb-field-hiperlink:hover {
+    --bs-link-color-rgb: var(--bs-link-hover-color-rgb);
+}
