@@ -170,6 +170,8 @@ pages/
 | :-------------- | :------------------------------------------------------- |
 | Conjunto de CEP | CEP, Logradouro, Número, Bairro, Cidade, UF, Complemento |
 
+O Conjunto de CEP integra a API [ViaCEP](https://viacep.com.br/) — ao preencher o campo CEP no `render.html`, os demais campos do conjunto são preenchidos automaticamente.
+
 ## Sobre os valores dos campos
 
 Os campos `value` e `values` são inicialmente definidos no `formBuilder`.

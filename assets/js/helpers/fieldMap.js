@@ -1,6 +1,6 @@
 import { CUSTOM_FIELD_TYPE, CUSTOM_INPUT_SETS, CBO_DATALIST_ID } from "./constants.js";
 import { createDatalist, bindDatalist } from "./dom.js";
-import { getCBOData } from "./utils.js";
+import { getCBOData, keepOnlyDigits } from "./utils.js";
 import { isValidURL } from "./validation.js";
 
 // #region Campos customizados
@@ -145,6 +145,88 @@ export function mapCepFieldGroup(fieldId, fieldData) {
 
         if (isCepGroupEnd) cepGroupRef = null;
     }
+}
+
+/**
+ * Consulta o serviço ViaCEP e preenche automaticamente os campos do conjunto.
+ *
+ * - Extrai os dígitos do CEP informado.
+ * - Verifica se o CEP possui 8 caracteres válidos.
+ * - Identifica a classe dinâmica que vincula os campos do conjunto.
+ * - Consulta a API do ViaCEP.
+ * - Preenche automaticamente os campos do grupo correspondente.
+ *
+ * @async
+ * @param {HTMLInputElement} cepInput - Campo de input onde o CEP foi digitado.
+ * @returns {Promise<void>}
+ * @see {@link https://viacep.com.br/|ViaCEP}
+ */
+export async function fetchCepFromViaCep(cepInput) {
+    const cep = keepOnlyDigits(cepInput.value);
+
+    const cepGroupClass = Array.from(cepInput.classList).find((className) => className.startsWith("fb-input-set-cep-"));
+
+    if (!cepGroupClass) return;
+
+    const fields = document.querySelectorAll(`.${cepGroupClass}`);
+
+    const clearAddressFields = () => {
+        fields.forEach((field) => {
+            if (field.tagName === "SELECT") {
+                field.selectedIndex = 0;
+                return;
+            }
+
+            field.value = "";
+        });
+    };
+
+    if (cepInput.classList.contains("is-invalid")) {
+        clearAddressFields();
+        return;
+    }
+
+    try {
+        const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+        const data = await response.json();
+
+        if (data.erro) {
+            console.warn("CEP não encontrado.");
+
+            clearAddressFields();
+
+            return;
+        }
+
+        fields.forEach((field) => {
+            if (field.classList.contains("fb-field-logradouro")) field.value = data.logradouro || "";
+            if (field.classList.contains("fb-field-bairro")) field.value = data.bairro || "";
+            if (field.classList.contains("fb-field-localidade")) field.value = data.localidade || "";
+            if (field.classList.contains("fb-field-uf")) field.value = data.uf || "";
+        });
+    } catch (error) {
+        console.error(error, "Erro ao consultar o CEP.");
+
+        clearAddressFields();
+    }
+}
+
+/**
+ * Inicializa o preenchimento automático de endereço via ViaCEP para todos os
+ * campos CEP do conjunto presentes no elemento raiz.
+ *
+ * Registra o evento `change` em cada campo com a classe `fb-field-cep`,
+ * disparando a consulta ao ViaCEP ao sair do campo com um CEP válido.
+ *
+ * @param {HTMLElement} root - Elemento raiz que contém os campos renderizados.
+ * @returns {void}
+ */
+export function initCepAutoFill(root) {
+    const cepFields = root.querySelectorAll(`.${CUSTOM_FIELD_TYPE.cep.class}`);
+
+    if (!cepFields.length) return;
+
+    cepFields.forEach((cepInput) => cepInput.addEventListener("change", () => fetchCepFromViaCep(cepInput)));
 }
 
 // #endregion

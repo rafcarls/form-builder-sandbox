@@ -1,5 +1,5 @@
 import { CUSTOM_FIELD_TYPE } from "./constants.js";
-import { mapCepFieldGroup, mapCBODatalist, initCBODatalist, initHyperlinkField } from "./fieldMap.js";
+import { mapCepFieldGroup, mapCBODatalist, initCBODatalist, initHyperlinkField, initCepAutoFill } from "./fieldMap.js";
 import * as mask from "./mask.js";
 import * as validation from "./validation.js";
 
@@ -92,6 +92,7 @@ const fieldBehaviorMap = {
  * Além disso, inicializa recursos adicionais necessários para o formulário:
  * - **CBO Datalist** — popula dinamicamente os campos relacionados via `initCBODatalist`.
  * - **Hiperlink** — registra o evento de clique para abertura de URL via `initHyperlinkField`.
+ * - **CEP AutoFill** — registra o evento `change` para consulta ao ViaCEP via `initCepAutoFill`.
  *
  * @param {HTMLElement} root - Elemento raiz que envolve os campos do formulário.
  * @returns {Promise<void>}
@@ -125,6 +126,8 @@ export async function registerFieldBehavior(root) {
     initHyperlinkField(root);
 
     await initCBODatalist(root);
+
+    initCepAutoFill(root);
 }
 
 /**
