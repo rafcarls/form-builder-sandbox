@@ -1,6 +1,6 @@
 import * as config from "./config.js";
 import { reorderSidebarItems } from "./helpers/dom.js";
-import { onFieldAdded, registerFieldBehavior } from "./helpers/fieldBehavior.js";
+import { onFieldAdded, onFieldEdit, registerFieldBehavior } from "./helpers/fieldBehavior.js";
 import { getFormData } from "./helpers/utils.js";
 
 /**
@@ -129,7 +129,9 @@ async function initFormBuilder() {
             replaceFields: config.replaceFields,
             fields: config.fields,
             inputSets: config.inputSets,
+            typeUserAttrs: config.typeUserAttrs,
             onAddFieldAfter: onFieldAdded,
+            onOpenFieldEdit: (editPanel) => onFieldEdit(editPanel),
         };
 
         const formBuilder = await $(root).formBuilder(options).promise;

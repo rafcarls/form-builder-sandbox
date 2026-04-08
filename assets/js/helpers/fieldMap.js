@@ -230,3 +230,116 @@ export function initCepAutoFill(root) {
 }
 
 // #endregion
+
+// #region Painel de edição do formBuilder
+
+/**
+ * Registra o comportamento de validação de um campo de limite (mín. ou máx.) do checkbox-group.
+ *
+ * - Permite apenas dígitos.
+ * - Garante que o valor fique entre 1 e o total de opções.
+ * - Sincroniza os campos min/max para evitar inconsistências.
+ *
+ * @param {HTMLInputElement} input - Campo de limite a ser registrado.
+ * @param {HTMLInputElement} maxInput - Campo de máximo selecionável.
+ * @param {HTMLInputElement} minInput - Campo de mínimo selecionável.
+ * @param {() => number} getTotalOptions - Função que retorna o total de opções do grupo.
+ * @returns {void}
+ */
+function registerLimitInput(input, maxInput, minInput, getTotalOptions) {
+    input.addEventListener("input", (e) => {
+        const target = e.target;
+
+        target.value = target.value.replace(/\D/g, "");
+
+        const total = getTotalOptions();
+        const isMax = target.classList.contains("fb-field-checkbox--max-selected");
+        const isMin = target.classList.contains("fb-field-checkbox--min-selected");
+
+        if (target.value === "" || parseInt(target.value) === 0) target.value = 1;
+        else if (parseInt(target.value) > total) target.value = total;
+
+        const currentMax = parseInt(maxInput.value);
+        const currentMin = parseInt(minInput.value);
+
+        if (isMin && currentMin > currentMax) maxInput.value = currentMin;
+        if (isMax && currentMax < currentMin) minInput.value = currentMax;
+    });
+}
+
+/**
+ * Registra o comportamento do botão de adição de opções do checkbox-group.
+ *
+ * - Ao adicionar uma opção, atualiza `maxInput` para o novo total e reseta `minInput` para 1.
+ * - Ao remover uma opção, ajusta ambos os campos para não ultrapassar o novo total.
+ *
+ * @param {HTMLElement} addOptionBtn - Botão de adição de opções.
+ * @param {HTMLInputElement} maxInput - Campo de máximo selecionável.
+ * @param {HTMLInputElement} minInput - Campo de mínimo selecionável.
+ * @param {string} panelId - ID do painel de edição do campo.
+ * @returns {void}
+ */
+function registerAddOptionButton(addOptionBtn, maxInput, minInput, panelId) {
+    const EVENT_BIND_DELAY = 500;
+
+    addOptionBtn.addEventListener("click", () => {
+        setTimeout(() => {
+            document.querySelectorAll(`#${panelId} .formbuilder-icon-cancel`).forEach((btn) => {
+                const isRemovable = btn.style.display !== "none";
+
+                if (isRemovable) {
+                    btn.addEventListener("click", () => {
+                        const total =
+                            document.querySelectorAll(`#${panelId} .sortable-options-wrap .option-selected`).length - 1;
+
+                        if (parseInt(maxInput.value) > total) maxInput.value = total;
+                        if (parseInt(minInput.value) > total) minInput.value = total;
+                    });
+                }
+            });
+        }, EVENT_BIND_DELAY);
+
+        const total = document.querySelectorAll(`#${panelId} .formbuilder-icon-cancel`).length + 1;
+
+        maxInput.value = total;
+        minInput.value = 1;
+    });
+}
+
+/**
+ * Inicializa os controles de limite mínimo e máximo de seleção no painel de edição
+ * de um campo `checkbox-group` do formBuilder.
+ *
+ * - Define o valor inicial de `maxInput` como o total de opções existentes.
+ * - Registra validação e sincronização entre os campos min/max.
+ * - Registra o comportamento do botão de adição/remoção de opções.
+ *
+ * @param {HTMLElement} editPanel - Painel de edição do campo gerado pelo formBuilder.
+ * @returns {void}
+ */
+export function initCheckboxGroupSelectionLimits(editPanel) {
+    const isCheckboxGroupField = document
+        .querySelector(`#${editPanel.id}`)
+        .closest("li")
+        .classList.contains("checkbox-group-field");
+
+    if (!isCheckboxGroupField) return;
+
+    const maxInput = document.querySelector(`#${editPanel.id} .fb-field-checkbox--max-selected`);
+    const minInput = document.querySelector(`#${editPanel.id} .fb-field-checkbox--min-selected`);
+    const addOptionBtn = document.querySelector(`#${editPanel.id} .add.add-opt`);
+
+    if (maxInput.value === "") maxInput.value = 1;
+    if (minInput.value === "") minInput.value = 1;
+
+    const getTotalOptions = () =>
+        document.querySelectorAll(`#${editPanel.id} .sortable-options-wrap .option-selected`).length;
+
+    maxInput.value = getTotalOptions();
+
+    registerLimitInput(maxInput, maxInput, minInput, getTotalOptions);
+    registerLimitInput(minInput, maxInput, minInput, getTotalOptions);
+    registerAddOptionButton(addOptionBtn, maxInput, minInput, editPanel.id);
+}
+
+// #endregion

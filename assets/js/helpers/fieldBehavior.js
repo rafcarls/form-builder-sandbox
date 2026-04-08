@@ -1,7 +1,15 @@
 import { CUSTOM_FIELD_TYPE } from "./constants.js";
-import { mapCepFieldGroup, mapCBODatalist, initCBODatalist, initHyperlinkField, initCepAutoFill } from "./fieldMap.js";
 import * as mask from "./mask.js";
 import * as validation from "./validation.js";
+
+import {
+    mapCepFieldGroup,
+    mapCBODatalist,
+    initCBODatalist,
+    initHyperlinkField,
+    initCepAutoFill,
+    initCheckboxGroupSelectionLimits,
+} from "./fieldMap.js";
 
 /**
  * Representa o comportamento aplicado a um tipo de campo.
@@ -93,6 +101,7 @@ const fieldBehaviorMap = {
  * - **CBO Datalist** — popula dinamicamente os campos relacionados via `initCBODatalist`.
  * - **Hiperlink** — registra o evento de clique para abertura de URL via `initHyperlinkField`.
  * - **CEP AutoFill** — registra o evento `change` para consulta ao ViaCEP via `initCepAutoFill`.
+ * - **Checkbox Group Limits** — aplica limite máximo de seleção via `initCheckboxGroupLimits`.
  *
  * @param {HTMLElement} root - Elemento raiz que envolve os campos do formulário.
  * @returns {Promise<void>}
@@ -124,10 +133,10 @@ export async function registerFieldBehavior(root) {
     });
 
     initHyperlinkField(root);
+    initCepAutoFill(root);
+    initCheckboxGroupLimits(root);
 
     await initCBODatalist(root);
-
-    initCepAutoFill(root);
 }
 
 /**
@@ -143,4 +152,62 @@ export async function registerFieldBehavior(root) {
 export function onFieldAdded(fieldId, fieldData) {
     mapCBODatalist(fieldId, fieldData);
     mapCepFieldGroup(fieldId, fieldData);
+}
+
+/**
+ * Agrega os mapeamentos executados após a edição de um campo no formBuilder.
+ *
+ * Deve ser associado ao evento `onOpenFieldEdit` do formBuilder.
+ * Para adicionar novos comportamentos, inclua chamadas nesta função.
+ *
+ * @param {HTMLElement} editPanel - Painel de edição do campo gerado pelo formBuilder.
+ * @returns {void}
+ */
+export function onFieldEdit(editPanel) {
+    initCheckboxGroupSelectionLimits(editPanel);
+}
+
+/**
+ * Inicializa os limites mínimo e máximo de seleção para grupos de checkboxes no elemento raiz.
+ *
+ * Para cada grupo com os atributos `max-selected` e/ou `min-selected` definidos via `typeUserAttrs`:
+ * - **Máximo** — desabilita os checkboxes não marcados ao atingir o limite, reabilitando ao desmarcar.
+ * - **Mínimo** — alterna a classe `is-invalid` no grupo quando a quantidade de marcados for inferior ao mínimo.
+ *
+ * @param {HTMLElement} root - Elemento raiz que contém os campos renderizados.
+ * @returns {void}
+ */
+export function initCheckboxGroupLimits(root) {
+    const checkboxGroups = root.querySelectorAll(".checkbox-group");
+
+    checkboxGroups.forEach((group) => {
+        const checkboxes = group.querySelectorAll("input[type='checkbox']");
+
+        if (!checkboxes.length) return;
+
+        const firstCheckbox = checkboxes[0];
+        const maxSelected = parseInt(firstCheckbox.getAttribute("max-selected") || 0);
+        const minSelected = parseInt(firstCheckbox.getAttribute("min-selected") || 0);
+
+        const updateState = () => {
+            const checkedCount = Array.from(checkboxes).filter((cb) => cb.checked).length;
+
+            if (maxSelected > 0) {
+                const limitReached = checkedCount >= maxSelected;
+                checkboxes.forEach((cb) => {
+                    if (!cb.checked) cb.disabled = limitReached;
+                });
+            }
+
+            if (minSelected > 0) {
+                checkboxes.forEach((cb) => {
+                    cb.classList.toggle("is-invalid", checkedCount < minSelected);
+                });
+            }
+        };
+
+        checkboxes.forEach((cb) => cb.addEventListener("change", updateState));
+
+        updateState();
+    });
 }

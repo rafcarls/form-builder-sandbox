@@ -165,6 +165,48 @@ export const replaceFields = [
 export const scrollToFieldOnAdd = true;
 
 /**
+ * Estrutura de um atributo customizado do painel de edição do formBuilder.
+ *
+ * @typedef {Object} UserAttr
+ * @property {string} label - Texto exibido no painel de edição.
+ * @property {string} className - Classes CSS aplicadas ao input gerado.
+ * @property {string} type - Tipo do input (`number`, `text`, etc.).
+ * @property {*} value - Valor padrão do atributo.
+ * @property {number} [min] - Valor mínimo permitido (para inputs numéricos).
+ * @property {number} [max] - Valor máximo permitido (para inputs numéricos).
+ */
+
+/**
+ * Atributos customizados adicionados ao painel de edição de campos específicos do formBuilder.
+ *
+ * Cada chave representa um tipo de campo (`checkbox-group`, `text`, etc.) e o valor
+ * é um mapa de atributos extras exibidos no painel de edição daquele tipo.
+ *
+ * Os valores são persistidos no `formData` e renderizados como atributos HTML
+ * nos campos gerados pelo formRender.
+ *
+ * @type {Record<string, Record<string, UserAttr>>}
+ */
+export const typeUserAttrs = {
+    "checkbox-group": {
+        minSelected: {
+            label: "Seleção mínima",
+            className: "form-control fb-field-checkbox--min-selected",
+            type: "number",
+            value: 1,
+            min: 1,
+        },
+        maxSelected: {
+            label: "Seleção máxima",
+            className: "form-control fb-field-checkbox--max-selected",
+            type: "number",
+            value: 1,
+            min: 1,
+        },
+    },
+};
+
+/**
  * Campos customizados adicionais disponíveis no formBuilder.
  *
  * @type {FormBuilderField[]}
